@@ -14,8 +14,12 @@ from flax.serialization import (from_bytes, from_state_dict, to_bytes,
                                 to_state_dict)
 from flax.traverse_util import empty_node, flatten_dict, unflatten_dict
 from jax.experimental import mesh_utils
-from jax.sharding import Mesh, NamedSharding
-from jax.sharding import PartitionSpec as PS
+# from jax.sharding import Mesh, NamedSharding
+from jax.sharding import NamedSharding
+from jax.experimental.maps import Mesh
+# from .sharding_impls import NamedSharding
+# from jax.sharding import PartitionSpec as PS
+from jax.experimental import PartitionSpec as PS
 from ml_collections import ConfigDict
 
 import pdb

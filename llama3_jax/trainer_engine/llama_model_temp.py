@@ -19,14 +19,11 @@ import jax
 import jax.numpy as jnp
 from jax import lax
 from flax.linen import Module, compact
-# from flax.linen.initializers import zeros_init
+from flax.linen.initializers import zeros_init
 from flax.linen.dtypes import promote_dtype
 from typing import Any, Callable
 
 default_kernel_init = jax.nn.initializers.lecun_normal()
-
-def zeros_init():
-    return jax.nn.initializers.zeros
 
 class LoRADense(Module):
     features: int
@@ -265,13 +262,13 @@ class Attention(nn.Module):
             self.wv(hidden_states),
         )
 
-        # # Apply sharding constraints for model partitioning.
-        # xq = jax_utils.apply_sharding_constraint(
-        #     xq, PS(("dp", "fsdp"), None, "mp"))
-        # xk = jax_utils.apply_sharding_constraint(
-        #     xk, PS(("dp", "fsdp"), None, "mp"))
-        # xv = jax_utils.apply_sharding_constraint(
-        #     xv, PS(("dp", "fsdp"), None, "mp"))
+        # Apply sharding constraints for model partitioning.
+        xq = jax_utils.apply_sharding_constraint(
+            xq, PS(("dp", "fsdp"), None, "mp"))
+        xk = jax_utils.apply_sharding_constraint(
+            xk, PS(("dp", "fsdp"), None, "mp"))
+        xv = jax_utils.apply_sharding_constraint(
+            xv, PS(("dp", "fsdp"), None, "mp"))
 
         # Reshape query for multi-head attention
         xq = einops.rearrange(
@@ -349,9 +346,9 @@ class Attention(nn.Module):
             precision=self.precision,
         )
 
-        # # Apply sharding constraint to attention weights
-        # attn_weights = jax_utils.apply_sharding_constraint(
-        #     attn_weights, PS(("dp", "fsdp"), "mp", None, None))
+        # Apply sharding constraint to attention weights
+        attn_weights = jax_utils.apply_sharding_constraint(
+            attn_weights, PS(("dp", "fsdp"), "mp", None, None))
 
         # Compute attention output
         attn_output = jnp.einsum("...hqk,...khd->...qhd",
@@ -496,8 +493,8 @@ class TransformerBlock(nn.Module):
             feed_forward_input,
             deterministic,
         )
-        # feed_forward_hidden_states = jax_utils.apply_sharding_constraint(
-        #     feed_forward_hidden_states, PS(("dp", "fsdp"), None, "mp"))
+        feed_forward_hidden_states = jax_utils.apply_sharding_constraint(
+            feed_forward_hidden_states, PS(("dp", "fsdp"), None, "mp"))
 
         hidden_states = hidden_states + feed_forward_hidden_states
 

@@ -18,8 +18,12 @@ import jax.numpy as jnp
 import optax
 import torch
 from flax.training import train_state
-from jax.sharding import Mesh, NamedSharding
-from jax.sharding import PartitionSpec as PS
+# from jax.sharding import Mesh, NamedSharding
+from jax.sharding import NamedSharding
+# from jax.experimental.maps import Mesh
+# from .sharding_impls import NamedSharding
+# from jax.sharding import PartitionSpec as PS
+from jax.experimental import PartitionSpec as PS
 from transformers import LlamaConfig, LlamaForCausalLM
 
 from . import checkpoint_lib, jax_utils, utils
@@ -96,14 +100,14 @@ class CausalLMTrainer(FelafaxTrainer):
         )
 
         state_shapes = self.get_state_shapes()
-        self.state_shapes_partitioned = jax_utils.match_partition_rules(
-            self.model_configurator.get_partition_rules(), state_shapes)
+        # self.state_shapes_partitioned = jax_utils.match_partition_rules(
+        #     self.model_configurator.get_partition_rules(), state_shapes)
 
-        self.shard_fns, self.gather_fns = checkpoint_lib.make_shard_and_gather_fns(
-            self.state_shapes_partitioned, state_shapes)
+        # self.shard_fns, self.gather_fns = checkpoint_lib.make_shard_and_gather_fns(
+        #     self.state_shapes_partitioned, state_shapes)
 
-        jax_utils.init_rng(99)
-        jax_utils.next_rng()
+        # jax_utils.init_rng(99)
+        # jax_utils.next_rng()
 
         if self.model_params is None:
             params, lora_params = self.load_checkpoint(self.model_ckpt_path,
@@ -407,11 +411,16 @@ class CausalLMTrainer(FelafaxTrainer):
         if self.model_name is None or self.model_name in [
                 "llama-3.1-8B-Instruct-JAX", "llama-3.1-8B-JAX"
         ]:
+        # Remove all shard_fns here!
+            # _, variables = (self.checkpointer.load_trainstate_checkpoint(
+            #     "flax_params::" + path, state_shapes, self.shard_fns))
             _, variables = (self.checkpointer.load_trainstate_checkpoint(
-                "flax_params::" + path, state_shapes, self.shard_fns))
+                "flax_params::" + path, state_shapes))
         else:
+            # _, variables = (self.checkpointer.load_trainstate_checkpoint(
+            #     "params::" + path, state_shapes, self.shard_fns))
             _, variables = (self.checkpointer.load_trainstate_checkpoint(
-                "params::" + path, state_shapes, self.shard_fns))
+                "params::" + path, state_shapes))
 
         # Separate model params and trainable lora params
         params, lora_params = (variables.pop('params'),

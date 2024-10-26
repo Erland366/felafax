@@ -1,7 +1,8 @@
 from copy import copy, deepcopy
 from typing import Union
 
-from jax.sharding import PartitionSpec as PS
+# from jax.sharding import PartitionSpec as PS
+from jax.experimental import PartitionSpec as PS
 from transformers.configuration_utils import PretrainedConfig
 from transformers.modeling_flax_outputs import (FlaxBaseModelOutput,
                                                 FlaxCausalLMOutput)
