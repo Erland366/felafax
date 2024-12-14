@@ -28,6 +28,7 @@ from jax._src import traceback_util
 from jax._src.lib import pytree
 from jax._src.util import safe_zip
 from jax._src.util import unzip2
+from jax.tree_util import tree_flatten
 
 
 traceback_util.register_exclusion(__file__)
@@ -111,12 +112,6 @@ dispatch_registry = pytree.PyTreeRegistry(
 dispatch_registry.__module__ = __name__
 dispatch_registry.__name__ = "dispatch_registry"
 
-
-def tree_flatten(tree: Any,
-                 is_leaf: Callable[[Any], bool] | None = None
-                 ) -> tuple[list[Leaf], PyTreeDef]:
-  """Alias of :func:`jax.tree.flatten`."""
-  return default_registry.flatten(tree, is_leaf)
 
 
 def tree_unflatten(treedef: PyTreeDef, leaves: Iterable[Leaf]) -> Any:
